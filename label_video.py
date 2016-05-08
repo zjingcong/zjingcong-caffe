@@ -3,10 +3,22 @@
 
 import os
 import sys
+import yaml
+import subprocess
 
-DATASETPATH = sys.argv[1]   # DATASETPATH = '/disk/zjingcong/Smoke_Dataset_20160503/'
-LABELFILE = 'label_video.txt'
+
+if len(sys.argv) == 2:
+    DATASETPATH = sys.argv[1]   # DATASETPATH = '/disk/zjingcong/Smoke_Dataset_20160503/'
+else:
+    DATASETPATH = '/disk/zjingcong/Smoke_Dataset_20160503/'
+
+LABELFILE = 'label_video.yaml'
 DB_PATH = '/disk/zjingcong/frame_db/'
+
+command = ['touch', LABELFILE]
+p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+out, err = p.communicate()
+print out, err
 
 # parse db
 label_list = []
@@ -24,20 +36,24 @@ for path in os.walk(DATASETPATH):
         label = 1
 
     for video in video_list:
-        video_name = video.strip('.mp4')
-        video_name = video_name.strip('.avi')
+        video_name = video[: -4]
         video_frame_path = os.path.join(DB_PATH, video_name)
-        label_list.append('{0} {1}\n'.format(video_frame_path, label))
+        label_list.append({'class': data_class, 'path': video_frame_path, 'label': label})
 
 print "Summary {0} videos.".format(len(label_list))
 
 # update label_video file
-with open(LABELFILE, 'r') as label_file:
-    video_data = label_file.readlines()
-label_list = label_list + video_data
-label_list = list(set(label_list))
-label_str = ''.join(map(str, label_list))
+# video class + video frame path + label
+f = file(LABELFILE, 'r')
+video_list = yaml.load(f)
+if video_list is not None:
+    label_list = video_list + label_list
 
 with open(LABELFILE, 'w') as label_file:
-    label_file.write(label_str)
+    label_file.write(yaml.dump(label_list, default_flow_style=False))
 
+print "========== Total Dataset Summary =========="
+print "# Total: {0}".format(len(label_list))
+smoke_list = [i for i in label_list if i.get('label') == 1]
+print "# Smoke videos: {0}".format(len(smoke_list))
+print "# No smoke videos: {0}".format(len(label_list) - len(smoke_list))

@@ -27,7 +27,7 @@ skip_list = []
 class extract_thread(threading.Thread):
     def __init__(self, video_path):
         super(extract_thread, self).__init__()
-        # print "Extract video {0}...".format(video_path)
+        print "Extract video {0}...".format(video_path)
         self.video_path = video_path
 
     def run(self):
@@ -97,9 +97,10 @@ def main():
     pprint.pprint(fail_list)
     print "Skip videos: "
     pprint.pprint(skip_list)
-    print "Success videos: {0}".format(success_num)
-    print "Fail videos: {0}".format(fail_num)
-    print "Skip videos: {0}".format(skip_num)
+    print "======================================="
+    print "# Success videos: {0}".format(success_num)
+    print "# Fail videos: {0}".format(fail_num)
+    print "# Skip videos: {0}".format(skip_num)
 
 if __name__ == '__main__':
     main()
