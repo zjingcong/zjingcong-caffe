@@ -9,10 +9,12 @@ TRAIN_VIDEO_FILE = 'Smoke_split_trainVideo.txt'
 TEST_VIDEO_FILE = 'Smoke_split_testVideo.txt'
 
 
-command = ['touch', TEST_VIDEO_FILE, TRAIN_VIDEO_FILE]
+# remove previous split txt file
+command = ['rm', TEST_VIDEO_FILE, TRAIN_VIDEO_FILE]
 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 p.communicate()
 
+# get video classes
 f = file(LABEL_FILE, 'r')
 video_list = yaml.load(f)
 class_list = list(set([i.get('class') for i in video_list]))
@@ -21,18 +23,11 @@ test_data_num = 0
 train_data_num = 0
 total = 0
 
-with open(TEST_VIDEO_FILE, 'r') as f:
-    test = f.readlines()
-with open(TRAIN_VIDEO_FILE, 'r') as f:
-    train = f.readlines()
-dataset = test + train
-
-print "\nAdd Train Data and Test Data..."
-print "*****************************"
+print "\nGet Train Data and Test Data..."
+print '=' * 29
 for video_class in class_list:
     video_per_class = ['{path} {label}\n'.format(path=i.get('path'), label=i.get('label')) for i in video_list
-                       if i.get('class') == video_class
-                       and '{path} {label}\n'.format(path=i.get('path'), label=i.get('label')) not in dataset]
+                       if i.get('class') == video_class]
     num = len(video_per_class)
     test_num = int(num / 3)
     train_num = num - test_num
@@ -48,18 +43,7 @@ for video_class in class_list:
     with open(TEST_VIDEO_FILE, 'a') as test_file:
         test_file.write(test_data)
 
-print "*****************************"
+print "========== Summary =========="
 print "# Total New Videos: {0}".format(total)
 print "# Train New Videos: {0}".format(train_data_num)
 print "# Test New Videos: {0}".format(test_data_num)
-
-with open(TRAIN_VIDEO_FILE, 'r') as f:
-    total_train = len(f.readlines())
-with open(TEST_VIDEO_FILE, 'r') as f:
-    total_test = len(f.readlines())
-total_video = total_train + total_test
-
-print "========== Summary =========="
-print "# Total Videos: {0}".format(total_video)
-print "# Train Videos: {0}".format(total_train)
-print "# Test Videos: {0}".format(total_test)

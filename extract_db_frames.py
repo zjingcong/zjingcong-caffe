@@ -11,9 +11,9 @@ import pprint
 DB_PATH = '/disk/zjingcong/frame_db/'
 
 if len(sys.argv) == 2:
-    DATASETPATH = sys.argv[1]   # DATASETPATH = '/disk/zjingcong/Smoke_Dataset_20160503/'
+    DATASETPATH = sys.argv[1]
 else:
-    DATASETPATH = '/disk/zjingcong/Smoke_Dataset_20160503/'
+    DATASETPATH = '/disk/zjingcong/Smoke_Dataset/Smoke_Dataset_20160503/'
 
 mutex = threading.Lock()
 success_num = 0
