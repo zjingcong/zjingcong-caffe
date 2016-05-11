@@ -22,7 +22,7 @@ import skimage.io
 import copy
 
 flow_frames = 'flow_images/'
-RGB_frames = 'frames/'
+RGB_frames = '/disk/zjingcong/frame_db/'
 test_frames = 16 
 train_frames = 16
 test_buffer = 3
@@ -136,7 +136,8 @@ class videoRead(caffe.Layer):
     self.height = 227
     self.width = 227
     self.path_to_images = RGB_frames 
-    self.video_list = 'ucf101_split1_testVideos.txt' 
+    # self.video_list = 'ucf101_split1_testVideos.txt'
+    self.video_list = '/home/zjc/workspace/git/zjingcong-caffe/Smoke_split_testVideo.txt'
 
   def setup(self, bottom, top):
     random.seed(10)
@@ -264,7 +265,9 @@ class videoReadTrain_flow(videoRead):
     self.height = 227
     self.width = 227
     self.path_to_images = flow_frames 
-    self.video_list = 'ucf101_split1_trainVideos.txt' 
+    # self.video_list = 'ucf101_split1_trainVideos.txt'
+    self.video_list = '/home/zjc/workspace/git/zjingcong-caffe/Smoke_split_trainVideo.txt'
+
 
 class videoReadTest_flow(videoRead):
 
@@ -279,7 +282,8 @@ class videoReadTest_flow(videoRead):
     self.height = 227
     self.width = 227
     self.path_to_images = flow_frames 
-    self.video_list = 'ucf101_split1_testVideos.txt' 
+    # self.video_list = 'ucf101_split1_testVideos.txt'
+    self.video_list = '/home/zjc/workspace/git/zjingcong-caffe/Smoke_split_testVideo.txt'
 
 class videoReadTrain_RGB(videoRead):
 
@@ -294,7 +298,8 @@ class videoReadTrain_RGB(videoRead):
     self.height = 227
     self.width = 227
     self.path_to_images = RGB_frames 
-    self.video_list = 'ucf101_split1_trainVideos.txt' 
+    # self.video_list = 'ucf101_split1_trainVideos.txt'
+    self.video_list = '/home/zjc/workspace/git/zjingcong-caffe/Smoke_split_trainVideo.txt'
 
 class videoReadTest_RGB(videoRead):
 
@@ -309,4 +314,5 @@ class videoReadTest_RGB(videoRead):
     self.height = 227
     self.width = 227
     self.path_to_images = RGB_frames 
-    self.video_list = 'ucf101_split1_testVideos.txt' 
+    # self.video_list = 'ucf101_split1_testVideos.txt'
+    self.video_list = '/home/zjc/workspace/git/zjingcong-caffe/Smoke_split_testVideo.txt'
