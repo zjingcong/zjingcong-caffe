@@ -31,6 +31,10 @@ for video_class in class_list:
     num = len(video_per_class)
     test_num = int(num / 3)
     train_num = num - test_num
+    if num == 2:
+        test_num = 1
+        train_num = 1
+
     test_data_num += test_num
     train_data_num += train_num
     total += num
