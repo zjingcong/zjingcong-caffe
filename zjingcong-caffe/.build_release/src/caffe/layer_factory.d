@@ -27,7 +27,8 @@
  include/caffe/data_layers.hpp include/caffe/data_transformer.hpp \
  include/caffe/filler.hpp include/caffe/internal_thread.hpp \
  include/caffe/net.hpp include/caffe/util/db.hpp \
- include/caffe/loss_layers.hpp include/caffe/neuron_layers.hpp
+ include/caffe/loss_layers.hpp include/caffe/neuron_layers.hpp \
+ include/caffe/python_layer.hpp
 
 include/caffe/layer.hpp:
 
@@ -110,3 +111,5 @@ include/caffe/util/db.hpp:
 include/caffe/loss_layers.hpp:
 
 include/caffe/neuron_layers.hpp:
+
+include/caffe/python_layer.hpp:
