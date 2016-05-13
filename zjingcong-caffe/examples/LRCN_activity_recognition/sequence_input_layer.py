@@ -20,6 +20,7 @@ from multiprocessing import Pool
 from threading import Thread
 import skimage.io
 import copy
+import pprint
 
 flow_frames = 'flow_images/'
 RGB_frames = '/disk/zjingcong/frame_db/'
@@ -150,13 +151,15 @@ class videoRead(caffe.Layer):
     current_line = 0
     self.video_order = []
     for ix, line in enumerate(f_lines):
-      video = line.split(' ')[0].split('/')[1]
+      video = line.split(' ')[0].split('/')[-1]
+      print "Video Name: ", video
+
       l = int(line.split(' ')[1])
       frames = glob.glob('%s%s/*.jpg' %(self.path_to_images, video))
       num_frames = len(frames)
       video_dict[video] = {}
       video_dict[video]['frames'] = frames[0].split('.')[0] + '.%04d.jpg'
-      video_dict[video]['reshape'] = (240,320)
+      video_dict[video]['reshape'] = (240, 320)
       video_dict[video]['crop'] = (227, 227)
       video_dict[video]['num_frames'] = num_frames
       video_dict[video]['label'] = l
@@ -165,7 +168,7 @@ class videoRead(caffe.Layer):
     self.video_dict = video_dict
     self.num_videos = len(video_dict.keys())
 
-    #set up data transformer
+    # set up data transformer
     shape = (self.N, self.channels, self.height, self.width)
         
     self.transformer = caffe.io.Transformer({'data_in': shape})
@@ -216,7 +219,8 @@ class videoRead(caffe.Layer):
     if self.thread is not None:
       self.join_worker() 
 
-    #rearrange the data: The LSTM takes inputs as [video0_frame0, video1_frame0,...] but the data is currently arranged as [video0_frame0, video0_frame1, ...]
+    # rearrange the data: The LSTM takes inputs as [video0_frame0, video1_frame0,...]
+    # but the data is currently arranged as [video0_frame0, video0_frame1, ...]
     new_result_data = [None]*len(self.thread_result['data']) 
     new_result_label = [None]*len(self.thread_result['label']) 
     new_result_cm = [None]*len(self.thread_result['clip_markers'])

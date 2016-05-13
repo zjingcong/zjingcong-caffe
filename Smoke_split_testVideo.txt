@@ -52,10 +52,10 @@
 /disk/zjingcong/frame_db/outdoor_fire_12_white_smoke 1
 /disk/zjingcong/frame_db/2016-05-04_23-58-42 0
 /disk/zjingcong/frame_db/sand_storm_1 0
-/disk/zjingcong/frame_db/2016-05-04_23-29-00 1
 /disk/zjingcong/frame_db/2016-05-04_22-23-57 1
+/disk/zjingcong/frame_db/the_continent_3_smoke 1
+/disk/zjingcong/frame_db/the_continent_2_smoke 1
 /disk/zjingcong/frame_db/2016-05-04_23-46-21 0
-/disk/zjingcong/frame_db/the_continent_2_smoke 0
 /disk/zjingcong/frame_db/3_2012-07-24_15-46-41 0
 /disk/zjingcong/frame_db/3_2012-07-24_14-16-30 0
 /disk/zjingcong/frame_db/3_2012-07-24_12-31-18 0

@@ -36,9 +36,6 @@
   path: /disk/zjingcong/frame_db/2016-05-05_0-06-55
 - class: cloud
   label: 0
-  path: /disk/zjingcong/frame_db/2016-05-04_22-04-54
-- class: cloud
-  label: 0
   path: /disk/zjingcong/frame_db/cloud_1
 - class: cloud
   label: 0
@@ -187,9 +184,6 @@
 - class: outdoor_black_smoke
   label: 1
   path: /disk/zjingcong/frame_db/canada_fire_4_black_smoke
-- class: outdoor_black_smoke
-  label: 1
-  path: /disk/zjingcong/frame_db/2016-05-04_22-00-42
 - class: outdoor_black_smoke
   label: 1
   path: /disk/zjingcong/frame_db/2016-05-05_0-13-04
@@ -349,12 +343,6 @@
 - class: cloud
   label: 0
   path: /disk/zjingcong/frame_db/cloud_11
-- class: people smoking
-  label: 0
-  path: /disk/zjingcong/frame_db/the_continent_3_smoke
-- class: people smoking
-  label: 0
-  path: /disk/zjingcong/frame_db/the_continent_2_smoke
 - class: cloud
   label: 0
   path: /disk/zjingcong/frame_db/3_2012-07-24_12-46-19
@@ -415,6 +403,12 @@
 - class: outdoor_red_smoke
   label: 1
   path: /disk/zjingcong/frame_db/building_fire_6_red_smoke
+- class: people_smoke
+  label: 1
+  path: /disk/zjingcong/frame_db/the_continent_3_smoke
+- class: people_smoke
+  label: 1
+  path: /disk/zjingcong/frame_db/the_continent_2_smoke
 - class: outdoor_white_smoke
   label: 1
   path: /disk/zjingcong/frame_db/2016-04-29_1-02-41
