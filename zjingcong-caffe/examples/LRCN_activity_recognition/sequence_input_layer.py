@@ -90,8 +90,8 @@ class sequenceGeneratorVideo(object):
       rand_frame = int(random.random()*(self.video_dict[key]['num_frames']-self.clip_length)+1+1)
       frames = []
 
-      for i in range(rand_frame,rand_frame+self.clip_length):
-        frames.append(self.video_dict[key]['frames'] %i)
+      for i in range(rand_frame, rand_frame+self.clip_length):
+        frames.append(self.video_dict[key]['frames'] % i)
      
       im_paths.extend(frames) 
     
@@ -155,7 +155,7 @@ class videoRead(caffe.Layer):
       print "Video Name: ", video
 
       l = int(line.split(' ')[1])
-      frames = glob.glob('%s%s/*.jpg' %(self.path_to_images, video))
+      frames = glob.glob('%s%s/*.jpg' % (self.path_to_images, video))
       num_frames = len(frames)
       video_dict[video] = {}
       video_dict[video]['frames'] = frames[0].split('.')[0] + '.%04d.jpg'
@@ -191,7 +191,8 @@ class videoRead(caffe.Layer):
     pool_size = 24
 
     self.image_processor = ImageProcessorCrop(self.transformer, self.flow)
-    self.sequence_generator = sequenceGeneratorVideo(self.buffer_size, self.frames, self.num_videos, self.video_dict, self.video_order)
+    self.sequence_generator = sequenceGeneratorVideo(self.buffer_size, self.frames, self.num_videos, self.video_dict,
+                                                     self.video_order)
 
     self.pool = Pool(processes=pool_size)
     self.batch_advancer = BatchAdvancer(self.thread_result, self.sequence_generator, self.image_processor, self.pool)

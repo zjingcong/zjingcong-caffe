@@ -13,12 +13,7 @@ import caffe
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
-
-RGB_video_path = '/disk/zjingcong/frame_db/'
-if len(sys.argv) > 1:
-    video = sys.argv[1]
-else:
-    video = 'outdoor_fire_1_black_smoke'
+caffemodel_path = '/home/zjc/zjingcong-caffe/zjingcong-caffe/examples/LRCN_activity_recognition'
 
 
 # Initialize transformers
@@ -75,24 +70,31 @@ def compute_fusion(RGB_pred, flow_pred, p):
     return np.argmax(p*np.mean(RGB_pred, 0) + (1-p)*np.mean(flow_pred, 0))
 
 
-# Initialization
-smoke_RGB = np.zeros((3, 1, 1))
-smoke_RGB[0, :, :] = 103.939
-smoke_RGB[1, :, :] = 116.779
-smoke_RGB[2, :, :] = 128.68
-transformer_RGB = initialize_transformer(smoke_RGB, False)
+def videoClassifier(video_path):
+    # Initialization
+    smoke_mean_RGB = np.zeros((3, 1, 1))
+    smoke_mean_RGB[0, :, :] = 103.939
+    smoke_mean_RGB[1, :, :] = 116.779
+    smoke_mean_RGB[2, :, :] = 128.68
+    transformer_RGB = initialize_transformer(smoke_mean_RGB, False)
 
-# Extract list of frames in video
-RGB_frames = glob.glob('%s%s/*.jpg' % (RGB_video_path, video))
+    # Extract list of frames in video
+    RGB_frames = glob.glob('%s/*.jpg' % video_path)
 
-# Models and weights
-lstm_model = 'deploy_lstm.prototxt'
-RGB_lstm = 'snapshots_lstm_RGB_iter_2560.caffemodel'
-RGB_lstm_net = caffe.Net(lstm_model, RGB_lstm, caffe.TEST)
-class_RGB_LRCN, predictions_RGB_LRCN = \
-         LRCN_classify_video(RGB_frames, RGB_lstm_net, transformer_RGB, False)
-del RGB_lstm_net
+    # Models and weights
+    lstm_model = 'deploy_lstm.prototxt'
+    RGB_lstm = 'snapshots_lstm_RGB_iter_2560.caffemodel'
+    RGB_lstm_net = caffe.Net(lstm_model, RGB_lstm, caffe.TEST)
+    class_RGB_LRCN, predictions_RGB_LRCN = LRCN_classify_video(RGB_frames, RGB_lstm_net, transformer_RGB, False)
 
-# Video Classifier
-video_classifier = {0: 'No_Smoke', 1: 'Smoke'}
-print "RGB LRCN model classified video as: %s.\n" % (video_classifier[class_RGB_LRCN])
+    del RGB_lstm_net
+
+    # Video Classifier
+    video_classifier = {0: 'No_Smoke', 1: 'Smoke'}
+    print "RGB LRCN model classified video as: %s.\n" % (video_classifier[class_RGB_LRCN])
+
+'''
+# test
+if __name__ == '__main__':
+    videoClassifier('waterfall_2')
+'''

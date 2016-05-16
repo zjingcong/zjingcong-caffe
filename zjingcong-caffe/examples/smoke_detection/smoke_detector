@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from classify_video import videoClassifier
+from optparse import OptionParser
+
+import pprint
+import subprocess
+import logging
+import time
+import os
+import sys
+import threading
+
+# videoClassifier('waterfall_2')
+
+scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
+
+
+def init():
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        filename='/home/zjc/log/smoke_detector-{time}.log'.format(time=scripttime),
+                        filemode='w')
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+
+class videoClassifyThread(threading.Thread):
+    def __init__(self):
+        super(videoClassifyThread, self).__init__()
+
+
+class smoke_detector:
+    def __init__(self, video_path):
+        self.video_path = video_path
+        self.tmp_file = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
+        self.video_name = os.path.split(self.video_path)[1][: -4]
+        self.video_frame_path = os.path.join(self.tmp_file, self.video_name)
+
+    def _frame_clip(self, clip_id, frame_list):
+        tmp_folder = os.path.join(self.tmp_file, '{video}-clip_{id}'.format(video=self.video_name, id=clip_id))
+        logging.info("Create tmp folder: {0}".format(tmp_folder))
+        command = ['mkdir', '-m', '775', tmp_folder]
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err != '':
+            logging.error(err)
+            sys.exit(1)
+
+        logging.info("Moving frames to tmp folder: {0}...".format(tmp_folder))
+        for frame_path in frame_list:
+            command = ['mv', frame_path, tmp_folder]
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            if err != '':
+                logging.error(err)
+                sys.exit(1)
+
+    def video_preprocess(self):
+        logging.info("Extract video frames from {0}...".format(self.video_path))
+        command = ['/bin/bash', 'smokeVideo_extractor.sh', self.video_path, '30', self.tmp_file]
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err != '':
+            logging.error(err)
+            sys.exit(1)
+
+        video_frame_list = []
+        for path in os.walk(self.video_frame_path):
+            if path[0] == self.video_frame_path:
+                video_frame_list = path[2]
+                video_frame_list = map(lambda x: os.path.join(self.video_frame_path, x), video_frame_list)
+                break
+
+        # order by frame_id
+        video_frame_list.sort(key=lambda x: int(x.split('.')[1]))
+
+        frame_num = len(video_frame_list)
+        clip_num = frame_num / 60
+        if frame_num % 60 != 0:
+            clip_num += 1
+        for i in xrange(clip_num):
+            if (i + 1) * 60 < frame_num:
+                frame_list = video_frame_list[i * 60: (i + 1) * 60]
+            else:
+                frame_list = video_frame_list[i * 60: frame_num]
+            self._frame_clip(i, frame_list)
+
+        # cleaner
+        command = ['rm', '-rf', self.video_frame_path]
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err != '':
+            logging.error(err)
+            sys.exit(1)
+
+    def video_classifiy(self):
+        self.video_preprocess()
+
+
+def get_options():
+    usage = "usage: %prog [options] ..."
+    parser = OptionParser(usage=usage)
+
+    parser.add_option('-v', '--video', action='store', dest='video', help='Path of the video that you wish to detect.')
+
+    (options, args) = parser.parse_args()
+
+    return options
+
+
+def main():
+    options = get_options()
+
+    if options.video:
+        smokeDetector = smoke_detector(options.video)
+        smokeDetector.video_classifiy()
+
+    else:
+        print "No video. Please use -v or --video to add video name and -h or --help for more details."
+
+if __name__ == '__main__':
+    init()
+    main()
