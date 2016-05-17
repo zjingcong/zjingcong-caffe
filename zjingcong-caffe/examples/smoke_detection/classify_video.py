@@ -10,9 +10,6 @@ caffe_root = '../../'
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 
-caffe.set_mode_gpu()
-caffe.set_device(0)
-
 caffemodel_path = '/home/zjc/zjingcong-caffe/zjingcong-caffe/examples/LRCN_activity_recognition'
 
 
@@ -47,8 +44,8 @@ def LRCN_classify_video(frames, net, transformer, is_flow):
     for i in range(0, vid_length, offset):
         if (i + clip_length) < vid_length:
             input_data.extend(input_images[i: i + clip_length])
-        else:  # video may not be divisible by clip_length
-            input_data.extend(input_images[-clip_length:])
+        else:
+            input_data.extend(input_images[-clip_length:])      # video may not be divisible by clip_length
     output_predictions = np.zeros((len(input_data), 2))
 
     for i in range(0, len(input_data), clip_length):
@@ -70,8 +67,11 @@ def compute_fusion(RGB_pred, flow_pred, p):
     return np.argmax(p*np.mean(RGB_pred, 0) + (1-p)*np.mean(flow_pred, 0))
 
 
-def videoClassifier(video_path):
+def videoClassifier(video_frame_path, gpu_device=0):
     # Initialization
+    caffe.set_mode_gpu()
+    caffe.set_device(gpu_device)
+
     smoke_mean_RGB = np.zeros((3, 1, 1))
     smoke_mean_RGB[0, :, :] = 103.939
     smoke_mean_RGB[1, :, :] = 116.779
@@ -79,7 +79,7 @@ def videoClassifier(video_path):
     transformer_RGB = initialize_transformer(smoke_mean_RGB, False)
 
     # Extract list of frames in video
-    RGB_frames = glob.glob('%s/*.jpg' % video_path)
+    RGB_frames = glob.glob('%s/*.jpg' % video_frame_path)
 
     # Models and weights
     lstm_model = 'deploy_lstm.prototxt'
@@ -89,12 +89,4 @@ def videoClassifier(video_path):
 
     del RGB_lstm_net
 
-    # Video Classifier
-    video_classifier = {0: 'No_Smoke', 1: 'Smoke'}
-    print "RGB LRCN model classified video as: %s.\n" % (video_classifier[class_RGB_LRCN])
-
-'''
-# test
-if __name__ == '__main__':
-    videoClassifier('waterfall_2')
-'''
+    return class_RGB_LRCN

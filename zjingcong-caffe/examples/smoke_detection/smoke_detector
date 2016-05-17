@@ -2,49 +2,68 @@
 # -*- coding: utf-8 -*-
 
 from classify_video import videoClassifier
-from optparse import OptionParser
 
+from optparse import OptionParser
 import pprint
 import subprocess
 import logging
 import time
 import os
 import sys
-import threading
-
-# videoClassifier('waterfall_2')
+# import threading
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
+clip_length = 32
 
 
 def init():
     logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                        format='%(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='/home/zjc/log/smoke_detector-{time}.log'.format(time=scripttime),
-                        filemode='w')
-
+                        filename='/home/zjc/log/smoke_detector/tmp/{time}.log'.format(time=scripttime),
+                        filemode='w'
+                        )
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
+    logging.info("Log location: /home/zjc/log/smoke_detector/tmp/{time}.log".format(time=scripttime))
 
+
+'''
 class videoClassifyThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, thread_id, video_frame_path):
+        self.thread_id = thread_id
+        self.video_frame_path = video_frame_path
         super(videoClassifyThread, self).__init__()
+
+    def run(self):
+        logging.info("Thread {0} - Classify video clip from {1}...".format(self.thread_id, self.video_frame_path))
+        try:
+            class_RGB_LRCN = videoClassifier(self.video_frame_path)
+        except:
+            logging.exception("Thread {0} - Classify video clip from {1}".format(self.thread_id, self.video_frame_path))
+            class_RGB_LRCN = -1
+        if mutex.acquire():
+            result_list[self.thread_id] = class_RGB_LRCN
+            mutex.release()
+'''
 
 
 class smoke_detector:
-    def __init__(self, video_path):
+    def __init__(self, video_path, gpu_id):
         self.video_path = video_path
-        self.tmp_file = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
+        self.gpu_id = gpu_id
+        self.tmp_folder = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
         self.video_name = os.path.split(self.video_path)[1][: -4]
-        self.video_frame_path = os.path.join(self.tmp_file, self.video_name)
+        self.video_frame_path = os.path.join(self.tmp_folder, self.video_name)
+        self.tmp_folder_list = []
 
     def _frame_clip(self, clip_id, frame_list):
-        tmp_folder = os.path.join(self.tmp_file, '{video}-clip_{id}'.format(video=self.video_name, id=clip_id))
+        tmp_folder = os.path.join(self.tmp_folder, '{video}-clip_{id}'.format(video=self.video_name, id=clip_id))
+        self.tmp_folder_list.append(tmp_folder)
         logging.info("Create tmp folder: {0}".format(tmp_folder))
         command = ['mkdir', '-m', '775', tmp_folder]
         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -63,8 +82,9 @@ class smoke_detector:
                 sys.exit(1)
 
     def video_preprocess(self):
+        logging.info("=========================== VIDEO PRE PROCESSING BEGIN ==============================")
         logging.info("Extract video frames from {0}...".format(self.video_path))
-        command = ['/bin/bash', 'smokeVideo_extractor.sh', self.video_path, '30', self.tmp_file]
+        command = ['/bin/bash', 'smokeVideo_extractor.sh', self.video_path, '30', self.tmp_folder]
         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
         if err != '':
@@ -81,18 +101,17 @@ class smoke_detector:
         # order by frame_id
         video_frame_list.sort(key=lambda x: int(x.split('.')[1]))
 
+        # clip the frames
+        # ignore the last clip(if clip_num < clip_length)
+        logging.info("Clip length: {0}".format(clip_length))
         frame_num = len(video_frame_list)
-        clip_num = frame_num / 60
-        if frame_num % 60 != 0:
-            clip_num += 1
+        clip_num = frame_num / clip_length
         for i in xrange(clip_num):
-            if (i + 1) * 60 < frame_num:
-                frame_list = video_frame_list[i * 60: (i + 1) * 60]
-            else:
-                frame_list = video_frame_list[i * 60: frame_num]
+            frame_list = video_frame_list[i * clip_length: (i + 1) * clip_length]
             self._frame_clip(i, frame_list)
 
         # cleaner
+        logging.info("Clean origin video frame path...")
         command = ['rm', '-rf', self.video_frame_path]
         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
@@ -100,8 +119,49 @@ class smoke_detector:
             logging.error(err)
             sys.exit(1)
 
+        logging.info("=========================== VIDEO PRE PROCESSING END ==============================")
+
     def video_classifiy(self):
         self.video_preprocess()
+
+        '''
+        global result_list, mutex
+        mutex = threading.Lock()
+        result_list = []
+        for i in xrange(len(self.tmp_folder_list)):
+            result_list.append(None)
+
+        for thread_id, tmp_folder in enumerate(self.tmp_folder_list):
+            video_clip_classifier = videoClassifyThread(thread_id, tmp_folder)
+            video_clip_classifier.start()
+
+        while threading.activeCount() > 1:
+            pass
+
+        '''
+        logging.info("=========================== VIDEO CLASSIFICATION BEGIN ==============================")
+        result_list = []
+        for tmp_folder in self.tmp_folder_list:
+            try:
+                class_RGB_LRCN = videoClassifier(tmp_folder, self.gpu_id)
+            except:
+                logging.exception(
+                    "Classify video clip from {0}".format(tmp_folder))
+                class_RGB_LRCN = -1
+            result_list.append(class_RGB_LRCN)
+            logging.info("Video clip {0} classification complete.".format(tmp_folder))
+
+        # clean the tmp folder
+        command = ['rm', '-rf', self.tmp_folder]
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err != '':
+            logging.error(err)
+            sys.exit(1)
+
+        logging.info("=========================== VIDEO CLASSIFICATION END ==============================")
+
+        print result_list
 
 
 def get_options():
@@ -109,6 +169,8 @@ def get_options():
     parser = OptionParser(usage=usage)
 
     parser.add_option('-v', '--video', action='store', dest='video', help='Path of the video that you wish to detect.')
+    parser.add_option('-g', '--gpu', action='store', dest='gpu', default=0,
+                      help='GPU device id. Default GPU device id is 0.')
 
     (options, args) = parser.parse_args()
 
@@ -119,7 +181,7 @@ def main():
     options = get_options()
 
     if options.video:
-        smokeDetector = smoke_detector(options.video)
+        smokeDetector = smoke_detector(options.video, int(options.gpu))
         smokeDetector.video_classifiy()
 
     else:
