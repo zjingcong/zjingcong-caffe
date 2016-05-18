@@ -37,11 +37,11 @@ for index, file_name in enumerate(file_list):
 if len(snapshot_file.get('caffemodel')) > 2:
     snapshot_file.get('caffemodel').sort(key=lambda x: int(x.split('.')[0].split('_')[4]))
     snapshot_file.get('solverstate').sort(key=lambda x: int(x.split('.')[0].split('_')[4]))
-    for file_name in snapshot_file.get('caffemodel')[0: -2]:
+    for file_name in snapshot_file.get('caffemodel'):
         move_file(file_name)
-    for file_name in snapshot_file.get('solverstate')[0: -2]:
+    for file_name in snapshot_file.get('solverstate'):
         move_file(file_name)
 
 print "========== Moving file at: {0} ==========".format(time.ctime())
-pprint.pprint(snapshot_file.get('caffemodel')[0: -2])
-pprint.pprint(snapshot_file.get('solverstate')[0: -2])
+pprint.pprint(snapshot_file.get('caffemodel'))
+pprint.pprint(snapshot_file.get('solverstate'))

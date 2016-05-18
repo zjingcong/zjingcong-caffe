@@ -279,8 +279,8 @@ class videoReadTest_flow(videoRead):
   def initialize(self):
     self.train_or_test = 'test'
     self.flow = True
-    self.buffer_size = test_buffer  #num videos processed per batch
-    self.frames = test_frames   #length of processed clip
+    self.buffer_size = test_buffer  # num videos processed per batch
+    self.frames = test_frames   # length of processed clip
     self.N = self.buffer_size*self.frames
     self.idx = 0
     self.channels = 3

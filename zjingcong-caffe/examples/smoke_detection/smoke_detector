@@ -21,8 +21,7 @@ def init():
                         format='%(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         filename='/home/zjc/log/smoke_detector/tmp/{time}.log'.format(time=scripttime),
-                        filemode='w'
-                        )
+                        filemode='w')
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
