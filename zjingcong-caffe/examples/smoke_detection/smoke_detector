@@ -139,15 +139,18 @@ class smoke_detector:
 
         '''
         logging.info("=========================== VIDEO CLASSIFICATION BEGIN ==============================")
-        result_list = []
+        lstm_result_list = []
+        singleFrame_result_list = []
         for tmp_folder in self.tmp_folder_list:
             try:
-                class_RGB_LRCN = videoClassifier(tmp_folder, self.gpu_id)
+                class_RGB_LRCN, class_RGB_singleFrame = videoClassifier(tmp_folder, self.gpu_id)
             except:
                 logging.exception(
                     "Classify video clip from {0}".format(tmp_folder))
                 class_RGB_LRCN = -1
-            result_list.append(class_RGB_LRCN)
+                class_RGB_singleFrame = -1
+            lstm_result_list.append(class_RGB_LRCN)
+            singleFrame_result_list.append(class_RGB_singleFrame)
             logging.info("Video clip {0} classification complete.".format(tmp_folder))
 
         # clean the tmp folder
@@ -160,7 +163,10 @@ class smoke_detector:
 
         logging.info("=========================== VIDEO CLASSIFICATION END ==============================")
 
-        print result_list
+        print "Result of LSTM: "
+        print lstm_result_list
+        print "Result of singleFrame: "
+        print singleFrame_result_list
 
 
 def get_options():
