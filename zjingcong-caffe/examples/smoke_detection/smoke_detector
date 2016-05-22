@@ -10,17 +10,16 @@ import logging
 import time
 import os
 import sys
-# import threading
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
-clip_length = 32
+clip_length = 16
 
 
 def init():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='/home/zjc/log/smoke_detector/tmp/{time}.log'.format(time=scripttime),
+                        filename='/home/zjc/log/smoke_detector_log/tmp/{time}.log'.format(time=scripttime),
                         filemode='w')
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
@@ -31,30 +30,11 @@ def init():
     logging.info("Log location: /home/zjc/log/smoke_detector/tmp/{time}.log".format(time=scripttime))
 
 
-'''
-class videoClassifyThread(threading.Thread):
-    def __init__(self, thread_id, video_frame_path):
-        self.thread_id = thread_id
-        self.video_frame_path = video_frame_path
-        super(videoClassifyThread, self).__init__()
-
-    def run(self):
-        logging.info("Thread {0} - Classify video clip from {1}...".format(self.thread_id, self.video_frame_path))
-        try:
-            class_RGB_LRCN = videoClassifier(self.video_frame_path)
-        except:
-            logging.exception("Thread {0} - Classify video clip from {1}".format(self.thread_id, self.video_frame_path))
-            class_RGB_LRCN = -1
-        if mutex.acquire():
-            result_list[self.thread_id] = class_RGB_LRCN
-            mutex.release()
-'''
-
-
 class smoke_detector:
-    def __init__(self, video_path, gpu_id):
+    def __init__(self, video_path, gpu_id, mode):
         self.video_path = video_path
         self.gpu_id = gpu_id
+        self.mode = mode
         self.tmp_folder = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
         self.video_name = os.path.split(self.video_path)[1][: -4]
         self.video_frame_path = os.path.join(self.tmp_folder, self.video_name)
@@ -105,6 +85,7 @@ class smoke_detector:
         logging.info("Clip length: {0}".format(clip_length))
         frame_num = len(video_frame_list)
         clip_num = frame_num / clip_length
+        logging.info("Clip num: {0}".format(clip_num))
         for i in xrange(clip_num):
             frame_list = video_frame_list[i * clip_length: (i + 1) * clip_length]
             self._frame_clip(i, frame_list)
@@ -123,27 +104,18 @@ class smoke_detector:
     def video_classifiy(self):
         self.video_preprocess()
 
-        '''
-        global result_list, mutex
-        mutex = threading.Lock()
-        result_list = []
-        for i in xrange(len(self.tmp_folder_list)):
-            result_list.append(None)
-
-        for thread_id, tmp_folder in enumerate(self.tmp_folder_list):
-            video_clip_classifier = videoClassifyThread(thread_id, tmp_folder)
-            video_clip_classifier.start()
-
-        while threading.activeCount() > 1:
-            pass
-
-        '''
         logging.info("=========================== VIDEO CLASSIFICATION BEGIN ==============================")
         lstm_result_list = []
         singleFrame_result_list = []
         for tmp_folder in self.tmp_folder_list:
             try:
-                class_RGB_LRCN, class_RGB_singleFrame = videoClassifier(tmp_folder, self.gpu_id)
+                result = videoClassifier(tmp_folder, self.gpu_id, self.mode)
+                if self.mode == 1:
+                    class_RGB_LRCN = result
+                elif self.mode == 2:
+                    class_RGB_singleFrame = result
+                elif self.mode == 3:
+                    class_RGB_LRCN, class_RGB_singleFrame = videoClassifier(tmp_folder, self.gpu_id, self.mode)
             except:
                 logging.exception(
                     "Classify video clip from {0}".format(tmp_folder))
@@ -159,7 +131,6 @@ class smoke_detector:
         out, err = p.communicate()
         if err != '':
             logging.error(err)
-            sys.exit(1)
 
         logging.info("=========================== VIDEO CLASSIFICATION END ==============================")
 
@@ -176,6 +147,9 @@ def get_options():
     parser.add_option('-v', '--video', action='store', dest='video', help='Path of the video that you wish to detect.')
     parser.add_option('-g', '--gpu', action='store', dest='gpu', default=0,
                       help='GPU device id. Default GPU device id is 0.')
+    parser.add_option('-m', '--mode', action='store', dest='mode', default=1,
+                      help='Select mode: 1 - LSTM only, 2 - singleFrame only, 3 - LSTM & singleFrame. '
+                           'The default mode is 1.')
 
     (options, args) = parser.parse_args()
 
@@ -186,7 +160,7 @@ def main():
     options = get_options()
 
     if options.video:
-        smokeDetector = smoke_detector(options.video, int(options.gpu))
+        smokeDetector = smoke_detector(options.video, int(options.gpu), options.mode)
         smokeDetector.video_classifiy()
 
     else:

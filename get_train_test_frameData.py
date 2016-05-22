@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Usage: run after get_train_test_videoData.py
 
 import subprocess
 import os

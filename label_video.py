@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Usage: python label_video <mode>(add conv-mirror)
+# Default mode is to label original videos
+# Mode: default/mirror
 
 import os
 import yaml
 import random
+import sys
 import pprint
 
 DATASETPATH = '/disk/zjingcong/Smoke_Dataset/'
@@ -11,6 +15,11 @@ LABELFILE = 'label_video.yaml'
 DB_PATH = '/disk/zjingcong/frame_db/'
 
 video_label_list = []
+
+mode = 'default'
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'mirror':
+        mode = 'mirror'
 
 
 # get conv pic list
@@ -43,12 +52,13 @@ def label_db(dataset_path):
             video_frame_path = os.path.join(DB_PATH, video_name)
             label_list.append({'class': data_class, 'path': video_frame_path, 'label': label})
             # add mirror pic label
-            mirror_video_name = 'conv-mirror-{0}'.format(video_name)
-            if mirror_video_name in conv_video_name_list:
-                mirror_video_frame_path = os.path.join(DB_PATH, mirror_video_name)
-                label_list.append({'class': data_class, 'path': mirror_video_frame_path, 'label': label})
+            if mode == 'mirror':
+                mirror_video_name = 'conv-mirror-{0}'.format(video_name)
+                if mirror_video_name in conv_video_name_list:
+                    mirror_video_frame_path = os.path.join(DB_PATH, mirror_video_name)
+                    label_list.append({'class': data_class, 'path': mirror_video_frame_path, 'label': label})
 
-    print "Summary {0} videos in {1}. [Include conv frame in {2}]".format(len(label_list), dataset_path, DB_PATH)
+    print "Summary {0} videos in {1}. [{2} MODE]".format(len(label_list), dataset_path, mode)
     global video_label_list
     video_label_list += label_list
 
@@ -63,7 +73,9 @@ for dataset_name in sub_dataset_list:
     label_db(dataset_path)
 
 # mis order label list
-random.shuffle(video_label_list)
+# default mode doesn't need this step
+if mode == 'mirror':
+    random.shuffle(video_label_list)
 
 # write label_video file
 # video class + video frame path + label

@@ -29,7 +29,9 @@ train_frames = 16
 test_buffer = 3
 train_buffer = 24
 
+
 def processImageCrop(im_info, transformer, flow):
+  # im_info: zip(im_paths,im_crop, im_reshape, im_flip)
   im_path = im_info[0]
   im_crop = im_info[1] 
   im_reshape = im_info[2]
@@ -40,7 +42,8 @@ def processImageCrop(im_info, transformer, flow):
   if im_flip:
     data_in = caffe.io.flip_image(data_in, 1, flow) 
     data_in = data_in[im_crop[0]:im_crop[2], im_crop[1]:im_crop[3], :] 
-  processed_image = transformer.preprocess('data_in',data_in)
+  processed_image = transformer.preprocess('data_in', data_in)
+
   return processed_image
 
 class ImageProcessorCrop(object):
@@ -49,6 +52,7 @@ class ImageProcessorCrop(object):
     self.flow = flow
   def __call__(self, im_info):
     return processImageCrop(im_info, self.transformer, self.flow)
+
 
 class sequenceGeneratorVideo(object):
   def __init__(self, buffer_size, clip_length, num_videos, video_dict, video_order):
@@ -66,13 +70,13 @@ class sequenceGeneratorVideo(object):
     im_crop = []
     im_reshape = []  
     im_flip = []
- 
+
+    # len(idx_list) = buffer_size
     if self.idx + self.buffer_size >= self.num_videos:
       idx_list = range(self.idx, self.num_videos)
       idx_list.extend(range(0, self.buffer_size-(self.num_videos-self.idx)))
     else:
       idx_list = range(self.idx, self.idx+self.buffer_size)
-    
 
     for i in idx_list:
       key = self.video_order[i]
@@ -85,7 +89,7 @@ class sequenceGeneratorVideo(object):
       r0 = int(random.random()*(video_reshape[0] - video_crop[0]))
       r1 = int(random.random()*(video_reshape[1] - video_crop[1]))
       im_crop.extend([(r0, r1, r0+video_crop[0], r1+video_crop[1])]*self.clip_length)     
-      f = random.randint(0,1)
+      f = random.randint(0, 1)
       im_flip.extend([f]*self.clip_length)
       rand_frame = int(random.random()*(self.video_dict[key]['num_frames']-self.clip_length)+1+1)
       frames = []
@@ -124,14 +128,14 @@ class BatchAdvancer():
     def __call__(self):
       return advance_batch(self.result, self.sequence_generator, self.image_processor, self.pool)
 
-class videoRead(caffe.Layer):
 
+class videoRead(caffe.Layer):
   def initialize(self):
     self.train_or_test = 'test'
     self.flow = False
     self.buffer_size = test_buffer  #num videos processed per batch
     self.frames = test_frames   #length of processed clip
-    self.N = self.buffer_size*self.frames
+    self.N = self.buffer_size * self.frames
     self.idx = 0
     self.channels = 3
     self.height = 227
@@ -179,7 +183,7 @@ class videoRead(caffe.Layer):
     else:
       image_mean = [103.939, 116.779, 128.68]
       self.transformer.set_is_flow('data_in', False)
-    channel_mean = np.zeros((3,227,227))
+    channel_mean = np.zeros((3, 227, 227))
     for channel_index, mean_val in enumerate(image_mean):
       channel_mean[channel_index, ...] = mean_val
     self.transformer.set_mean('data_in', channel_mean)
@@ -197,7 +201,7 @@ class videoRead(caffe.Layer):
     self.pool = Pool(processes=pool_size)
     self.batch_advancer = BatchAdvancer(self.thread_result, self.sequence_generator, self.image_processor, self.pool)
     self.dispatch_worker()
-    self.top_names = ['data', 'label','clip_markers']
+    self.top_names = ['data', 'label', 'clip_markers']
     print 'Outputs:', self.top_names
     if len(top) != len(self.top_names):
       raise Exception('Incorrect number of outputs (expected %d, got %d)' %
