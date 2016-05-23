@@ -91,7 +91,7 @@ class smoke_detector:
 
 def get_options():
     usage = "usage: %prog [options] ..."
-    parser = OptionParser(usage=usage)
+    parser = OptionParser()
 
     parser.add_option('-v', '--video', action='store', dest='video', help='Path of the video that you wish to detect.')
     parser.add_option('-g', '--gpu', action='store', dest='gpu', default=0,
