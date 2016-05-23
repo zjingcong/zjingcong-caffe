@@ -1,6 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # classify_video.py will classify a video using LRCN RGB model
-# Use: classify_video.py video, where video is the path of the video you wish to classify.
-# If no video is specified, the video "outdoor_fire_1_black_smoke" will be classified.
 
 import numpy as np
 import glob
@@ -9,6 +9,8 @@ import sys
 caffe_root = '../../'
 sys.path.insert(0, caffe_root + 'python')
 import caffe
+
+CLIP_LENGTH = 16
 
 
 # Initialize transformers
@@ -29,7 +31,7 @@ def initialize_transformer(image_mean, is_flow):
 
 # classify video with LRCN model
 def LRCN_classify_video(frames, net, transformer, is_flow):
-    clip_length = 16
+    clip_length = CLIP_LENGTH
     offset = 8
     input_images = []
     for im in frames:
@@ -47,7 +49,7 @@ def LRCN_classify_video(frames, net, transformer, is_flow):
     output_predictions = np.zeros((len(input_data), 2))
 
     for i in range(0, len(input_data), clip_length):
-        clip_input = input_data[i:i+clip_length]
+        clip_input = input_data[i: i + clip_length]
         clip_input = caffe.io.oversample(clip_input, [227, 227])
         clip_clip_markers = np.ones((clip_input.shape[0], 1, 1, 1))
         clip_clip_markers[0: 10, :, :, :] = 0
@@ -91,10 +93,10 @@ def singleFrame_classify_video(frames, net, transformer, is_flow):
 
 # Model fusion
 def compute_fusion(RGB_pred, flow_pred, p):
-    return np.argmax(p*np.mean(RGB_pred, 0) + (1-p)*np.mean(flow_pred, 0))
+    return np.argmax(p * np.mean(RGB_pred, 0) + (1-p) * np.mean(flow_pred, 0))
 
 
-# mode: 1 - LSTM only, 2 - singleFrame only, 3 - LSTM & singleFrame
+# mode: 1 - LSTM only, 2 - singleFrame only
 def videoClassifier(video_frame_path, gpu_device=0, mode=1):
     # Initialization
     caffe.set_mode_gpu()
@@ -112,15 +114,16 @@ def videoClassifier(video_frame_path, gpu_device=0, mode=1):
     # Models and weights
     lstm_model = 'deploy_lstm.prototxt'
     singleFrame_model = 'deploy_singleFrame.prototxt'
-    RGB_lstm = 'snapshots_lstm_RGB_iter_800.caffemodel'
+    RGB_lstm = 'snapshots_lstm_RGB_iter_1600.caffemodel'
     RGB_singleFrame = 'snapshots_singleFrame_RGB_iter_5000.caffemodel'
 
     if mode == 1:
         RGB_lstm_net = caffe.Net(lstm_model, RGB_lstm, caffe.TEST)
+        # predictions_RGB_LRCN: a list of classified results for every clip
         class_RGB_LRCN, predictions_RGB_LRCN = LRCN_classify_video(RGB_frames, RGB_lstm_net, transformer_RGB, False)
         del RGB_lstm_net
 
-        return class_RGB_LRCN
+        return predictions_RGB_LRCN
 
     if mode == 2:
         RGB_singleFrame_net = caffe.Net(singleFrame_model, RGB_singleFrame, caffe.TEST)
@@ -128,16 +131,4 @@ def videoClassifier(video_frame_path, gpu_device=0, mode=1):
                                                                                     transformer_RGB, False)
         del RGB_singleFrame_net
 
-        return class_RGB_singleFrame
-
-    if mode == 3:
-        RGB_lstm_net = caffe.Net(lstm_model, RGB_lstm, caffe.TEST)
-        class_RGB_LRCN, predictions_RGB_LRCN = LRCN_classify_video(RGB_frames, RGB_lstm_net, transformer_RGB, False)
-        del RGB_lstm_net
-
-        RGB_singleFrame_net = caffe.Net(singleFrame_model, RGB_singleFrame, caffe.TEST)
-        class_RGB_singleFrame, predictions_RGB_singleFrame = singleFrame_classify_video(RGB_frames, RGB_singleFrame_net,
-                                                                                    transformer_RGB, False)
-        del RGB_singleFrame_net
-
-        return class_RGB_LRCN, class_RGB_singleFrame
+        return predictions_RGB_singleFrame
