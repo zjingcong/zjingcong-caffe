@@ -10,10 +10,9 @@ import time
 
 mpg_path = '/disk/zjingcong/tmp/mpg_video'
 frame_rate_path = '/disk/zjingcong/tmp/video_30_fps'
-smoke_detection_fps = 30
+smoke_detection_fps = 15
 clip_length = 16
 
-frame_count = 0
 frame_rate = 30
 clock = pygame.time.Clock()
 
@@ -62,7 +61,6 @@ def init(video_path):
 def videoPlayer(video_path, smoke_list):
     # initialization
     init(video_path)
-    global frame_count
     pygame.init()
 
     movie = pygame.movie.Movie(mpg_video_path)
@@ -86,6 +84,7 @@ def videoPlayer(video_path, smoke_list):
     movie.set_display(movie_screen)
     movie.play()
 
+    frame_count = 0
     playing = True
     while playing:
         for event in pygame.event.get():
@@ -94,12 +93,17 @@ def videoPlayer(video_path, smoke_list):
                 playing = False
 
         screen.blit(movie_screen, (0, 0))
-        if frame_count < len(smoke_frame_list):
-            if smoke_frame_list[frame_count] == 1:
+        if movie.get_frame() < len(smoke_frame_list):
+            if smoke_frame_list[movie.get_frame()] == 1:
                 screen.blit(warning_logo, (movie.get_size()[0] / 2 - warning_logo.get_size()[0] / 2, 5))
 
         frame_count += 1
         clock.tick(frame_rate)
+
+        if (frame_count - movie.get_frame()) > 3:
+            print "Movie Frame: ", movie.get_frame()
+            print "Smoke Frame List: ", len(smoke_frame_list)
+            playing = False
 
         pygame.display.update()
 
@@ -110,7 +114,7 @@ def videoPlayer(video_path, smoke_list):
 
 '''
 # test
-test_video = '/disk/zjingcong/testVideo/truck_fire_1_black_smoke.mp4'
+test_video = '/disk/zjingcong/testVideo/testvideo3.mp4'
 smoke_list = [1, 0, 1, 1, 1, 1, 1, 0, 0, 0]
 videoPlayer(test_video, smoke_list)
 '''

@@ -23,6 +23,8 @@ success_list = []
 fail_list = []
 skip_list = []
 
+frame_rate = 30
+
 
 class extract_thread(threading.Thread):
     def __init__(self, video_path):
@@ -34,7 +36,7 @@ class extract_thread(threading.Thread):
         global success_num, fail_num, fail_list, success_list
         success = True
         try:
-            command = ['/bin/bash', 'extract_frames.sh', self.video_path, '30']
+            command = ['/bin/bash', 'extract_frames.sh', self.video_path, str(frame_rate)]
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             p.communicate()
             # print "Extract video {0} success.".format(self.video_path)

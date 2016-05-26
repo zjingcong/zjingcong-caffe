@@ -11,10 +11,13 @@ import logging
 import time
 import os
 import sys
+import numpy as np
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
 start_time = time.time()
 clip_length = 16
+offset = 24
+frame_rate = 15
 
 
 def init(video_name):
@@ -46,7 +49,7 @@ class smoke_detector:
         # Video preprocess: extract video frames
         logging.info("=========================== VIDEO PRE PROCESSING ==============================")
         logging.info("Extract video frames from {0}...".format(self.video_path))
-        command = ['/bin/bash', 'smokeVideo_extractor.sh', self.video_path, '30', self.tmp_folder]
+        command = ['/bin/bash', 'smokeVideo_extractor.sh', self.video_path, str(frame_rate), self.tmp_folder]
         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
         if err != '':
@@ -72,7 +75,13 @@ class smoke_detector:
             if self.mode == 1:
                 predictions_RGB_LRCN = result
                 tmp_list = list(predictions_RGB_LRCN)
-                result_list = map(lambda x: x.argmax(), tmp_list)
+
+                for index in range(0, len(tmp_list), offset):
+                    if index + offset < len(tmp_list):
+                        result = np.mean(np.array(tmp_list[index: index + offset]), 0).argmax()
+                    else:
+                        result = np.mean(np.array(tmp_list[-offset:]), 0).argmax()
+                    result_list.append(result)
 
                 print "Result of LSTM: "
                 print result_list

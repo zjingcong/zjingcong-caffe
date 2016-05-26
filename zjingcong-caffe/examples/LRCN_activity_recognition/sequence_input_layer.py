@@ -94,7 +94,7 @@ class sequenceGeneratorVideo(object):
       rand_frame = int(random.random()*(self.video_dict[key]['num_frames']-self.clip_length)+1+1)
       frames = []
 
-      for i in range(rand_frame, rand_frame+self.clip_length):
+      for i in range(rand_frame, rand_frame + self.clip_length):
         frames.append(self.video_dict[key]['frames'] % i)
      
       im_paths.extend(frames) 
@@ -134,7 +134,7 @@ class videoRead(caffe.Layer):
     self.train_or_test = 'test'
     self.flow = False
     self.buffer_size = test_buffer  #num videos processed per batch
-    self.frames = test_frames   #length of processed clip
+    self.frames = test_frames   # length of processed clip
     self.N = self.buffer_size * self.frames
     self.idx = 0
     self.channels = 3

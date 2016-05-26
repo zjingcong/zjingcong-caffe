@@ -73,9 +73,7 @@ for dataset_name in sub_dataset_list:
     label_db(dataset_path)
 
 # mis order label list
-# default mode doesn't need this step
-if mode == 'mirror':
-    random.shuffle(video_label_list)
+random.shuffle(video_label_list)
 
 # write label_video file
 # video class + video frame path + label
