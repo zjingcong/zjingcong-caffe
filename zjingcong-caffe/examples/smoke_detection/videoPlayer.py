@@ -58,9 +58,6 @@ def init(video_path):
     except:
         logging.exception("Convert video to mpg format error")
 
-    # load image
-    warning_logo = pygame.image.load('warning.PNG')
-
 
 def videoPlayer(video_path, smoke_list):
     # initialization
@@ -68,18 +65,26 @@ def videoPlayer(video_path, smoke_list):
     global frame_count
     pygame.init()
 
-    movie = pygame.movie.Movie(video_path)
-    screen = pygame.display.set_mode(movie.get_size())
+    movie = pygame.movie.Movie(mpg_video_path)
+    win_size = movie.get_size()
+
+    screen = pygame.display.set_mode(win_size)
     movie_screen = pygame.Surface(movie.get_size()).convert()
 
-    movie.set_display(movie_screen)
-    movie.play()
+    warning_logo = pygame.image.load('warning.PNG')
+    scale = float((win_size[1] / 10)) / warning_logo.get_size()[1]
+    warning_logo = pygame.transform.scale(warning_logo,
+                                          (int(scale * warning_logo.get_size()[0]),
+                                           int(scale * warning_logo.get_size()[1])))
 
     real_to_smoke = (frame_rate / smoke_detection_fps) * clip_length
     smoke_list_new = map(lambda x: [x] * real_to_smoke, smoke_list)
     smoke_frame_list = []
     for smoke_info in smoke_list_new:
         smoke_frame_list.extend(smoke_info)
+
+    movie.set_display(movie_screen)
+    movie.play()
 
     playing = True
     while playing:
@@ -105,7 +110,7 @@ def videoPlayer(video_path, smoke_list):
 
 '''
 # test
-test_video = '/disk/zjingcong/testVideo/lalala.mpg'
+test_video = '/disk/zjingcong/testVideo/truck_fire_1_black_smoke.mp4'
 smoke_list = [1, 0, 1, 1, 1, 1, 1, 0, 0, 0]
 videoPlayer(test_video, smoke_list)
 '''

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from classify_video import videoClassifier
+from videoPlayer import videoPlayer
 
 from optparse import OptionParser
 import pprint
@@ -65,6 +66,7 @@ class smoke_detector:
         self.video_preprocess()
 
         logging.info("=========================== VIDEO CLASSIFICATION BEGIN ==============================")
+        result_list = []
         try:
             result = videoClassifier(os.path.join(self.tmp_folder, self.video_name), self.gpu_id, self.mode)
             if self.mode == 1:
@@ -87,6 +89,8 @@ class smoke_detector:
 
         end_time = time.time()
         print "Time Usage: ", end_time - start_time
+
+        videoPlayer(self.video_path, result_list)
 
 
 def get_options():
