@@ -123,7 +123,7 @@ def videoClassifier(video_frame_path, gpu_device=0, mode=1):
         class_RGB_LRCN, predictions_RGB_LRCN = LRCN_classify_video(RGB_frames, RGB_lstm_net, transformer_RGB, False)
         del RGB_lstm_net
 
-        return predictions_RGB_LRCN
+        return class_RGB_LRCN, predictions_RGB_LRCN
 
     if mode == 2:
         RGB_singleFrame_net = caffe.Net(singleFrame_model, RGB_singleFrame, caffe.TEST)
@@ -131,4 +131,4 @@ def videoClassifier(video_frame_path, gpu_device=0, mode=1):
                                                                                     transformer_RGB, False)
         del RGB_singleFrame_net
 
-        return predictions_RGB_singleFrame
+        return class_RGB_singleFrame, predictions_RGB_singleFrame
