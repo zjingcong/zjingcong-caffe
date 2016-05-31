@@ -2,7 +2,7 @@ net: "train_test_lstm_RGB.prototxt"
 test_iter: 100
 test_state: { stage: 'test-on-test' }
 test_interval: 20
-base_lr: 0.001
+base_lr: 0.0005
 lr_policy: "step"
 gamma: 0.5
 stepsize: 500
@@ -13,7 +13,7 @@ weight_decay: 0.005
 snapshot: 100
 snapshot_prefix: "snapshots_lstm_RGB"
 solver_mode: GPU
-device_id: 0
+device_id: 3
 random_seed: 1701
 average_loss: 1000
 clip_gradients: 5

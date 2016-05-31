@@ -4,6 +4,7 @@
 
 import yaml
 import subprocess
+import random
 
 LABEL_FILE = 'label_video.yaml'
 TRAIN_VIDEO_FILE = 'Smoke_split_trainVideo.txt'
@@ -24,6 +25,9 @@ test_data_num = 0
 train_data_num = 0
 total = 0
 
+train_total_list = []
+test_total_list = []
+
 print "\nGet Train Data and Test Data..."
 print '=' * 29
 for video_class in class_list:
@@ -41,12 +45,23 @@ for video_class in class_list:
     total += num
     print "{0} | Total: {1}, Train: {2}, Test: {3}".format(video_class, num, train_num, test_num)
 
-    train_data = ''.join(map(str, video_per_class[0: train_num]))
-    test_data = ''.join(map(str, video_per_class[train_num: num]))
-    with open(TRAIN_VIDEO_FILE, 'a') as train_file:
-        train_file.write(train_data)
-    with open(TEST_VIDEO_FILE, 'a') as test_file:
-        test_file.write(test_data)
+    train_list = video_per_class[0: train_num]
+    test_list = video_per_class[train_num: num]
+
+    train_total_list.extend(train_list)
+    test_total_list.extend(test_list)
+
+# Shuffle the train data and test data
+random.shuffle(train_total_list)
+random.shuffle(test_total_list)
+
+# write the train and test data to txt file
+train_data = ''.join(map(str, train_total_list))
+test_data = ''.join(map(str, test_total_list))
+with open(TRAIN_VIDEO_FILE, 'w') as train_file:
+    train_file.write(train_data)
+with open(TEST_VIDEO_FILE, 'w') as test_file:
+    test_file.write(test_data)
 
 print "========== Summary =========="
 print "# Total Videos: {0}".format(total)

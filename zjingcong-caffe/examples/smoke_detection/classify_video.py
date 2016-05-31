@@ -97,7 +97,7 @@ def compute_fusion(RGB_pred, flow_pred, p):
 
 
 # mode: 1 - LSTM only, 2 - singleFrame only
-def videoClassifier(video_frame_path, gpu_device=0, mode=1):
+def videoClassifier(video_frame_path, gpu_device=0, mode=1, lstm_caffemodel='snapshots_lstm_RGB_iter_1600.caffemodel'):
     # Initialization
     caffe.set_mode_gpu()
     caffe.set_device(gpu_device)
@@ -114,7 +114,7 @@ def videoClassifier(video_frame_path, gpu_device=0, mode=1):
     # Models and weights
     lstm_model = 'deploy_lstm.prototxt'
     singleFrame_model = 'deploy_singleFrame.prototxt'
-    RGB_lstm = 'snapshots_lstm_RGB_iter_1600.caffemodel'
+    RGB_lstm = lstm_caffemodel
     RGB_singleFrame = 'snapshots_singleFrame_RGB_iter_5000.caffemodel'
 
     if mode == 1:

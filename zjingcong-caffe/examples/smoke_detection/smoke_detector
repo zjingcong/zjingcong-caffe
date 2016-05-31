@@ -12,12 +12,14 @@ import time
 import os
 import sys
 import numpy as np
+import glob
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
 start_time = time.time()
 clip_length = 16
 offset = 24
 frame_rate = 15
+stride_length = 8   # stride_length = offset in LRCN_classify_video in classify_video
 
 
 def init(video_name):
@@ -38,12 +40,25 @@ def init(video_name):
 
 
 class smoke_detector:
-    def __init__(self, video_path, gpu_id, mode):
+    def __init__(self, video_path, gpu_id, mode, lstm_model):
         self.video_path = video_path
         self.gpu_id = gpu_id
         self.mode = mode
+        self.lstm_model = lstm_model
         self.video_name = os.path.split(self.video_path)[1][: -4]
         self.tmp_folder = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
+
+    @staticmethod
+    def _init_index_list(frame_num):
+        index_list = []
+        index = range(frame_num)
+        for i in range(0, frame_num, stride_length):
+            if (i + clip_length) < frame_num:
+                index_list.extend(index[i: i + clip_length])
+            else:
+                index_list.extend(index[-clip_length:])
+
+        return index_list
 
     def video_preprocess(self):
         # Video preprocess: extract video frames
@@ -68,26 +83,44 @@ class smoke_detector:
     def video_classifiy(self):
         self.video_preprocess()
 
+        frame_num = len(glob.glob('%s/*.jpg' % os.path.join(self.tmp_folder, self.video_name)))
+
         logging.info("=========================== VIDEO CLASSIFICATION BEGIN ==============================")
         result_list = []
+        classifier_result_list = []
         try:
-            result = videoClassifier(os.path.join(self.tmp_folder, self.video_name), self.gpu_id, self.mode)[1]
+            result = videoClassifier(os.path.join(self.tmp_folder, self.video_name),
+                                     self.gpu_id, self.mode, self.lstm_model)[1]
             if self.mode == 1:
                 predictions_RGB_LRCN = result
                 tmp_list = list(predictions_RGB_LRCN)
+                index_list = self._init_index_list(frame_num)
 
+                for frame_id in xrange(frame_num):
+                    frame_index_list = [i for i in xrange(len(index_list)) if index_list[i] == frame_id]
+                    frame_predictions_array = np.array(map(lambda x: tmp_list[x], frame_index_list))
+                    result_0 = np.mean(frame_predictions_array, 0)[0]
+                    result_1 = np.mean(frame_predictions_array, 0)[1]
+                    result_list.append((result_0, result_1))
+                    classifier_result_list.append(np.mean(frame_predictions_array, 0).argmax())
+
+                '''
+                # get the result by group, when offset = 24, group_num = 16
                 for index in range(0, len(tmp_list), offset):
                     if index + offset < len(tmp_list):
                         result = np.mean(np.array(tmp_list[index: index + offset]), 0).argmax()
                     else:
                         result = np.mean(np.array(tmp_list[-offset:]), 0).argmax()
                     result_list.append(result)
+                '''
 
                 print "Result of LSTM: "
                 print result_list
+                print "Classifier result of LSTM: "
+                print classifier_result_list
 
             elif self.mode == 2:
-                predictions_RGB_singleFrame = result
+                predictions_RGB_singleFrame = result    # never used
         except:
             logging.exception("Classify video clip from {0} EXCEPTION".format(self.tmp_folder))
             logging.info("Video clip {0} classification complete.".format(self.tmp_folder))
@@ -99,7 +132,7 @@ class smoke_detector:
         end_time = time.time()
         print "Time Usage: ", end_time - start_time
 
-        videoPlayer(self.video_path, result_list)
+        # videoPlayer(self.video_path, result_list)
 
 
 def get_options():
@@ -112,6 +145,8 @@ def get_options():
     parser.add_option('-m', '--mode', action='store', dest='mode', default=1,
                       help='Select mode: 1 - LSTM only, 2 - singleFrame only. '
                            'The default mode is 1.')
+    parser.add_option('-l', '--lstm', action='store', dest='lstm', default='snapshots_lstm_RGB_iter_1600.caffemodel',
+                      help='Select the caffemodel used for lstm classification.')
 
     (options, args) = parser.parse_args()
 
@@ -123,7 +158,7 @@ def main():
 
     if options.video:
         init(options.video.split('/')[-1])
-        smokeDetector = smoke_detector(options.video, int(options.gpu), options.mode)
+        smokeDetector = smoke_detector(options.video, int(options.gpu), options.mode, options.lstm)
         smokeDetector.video_classifiy()
 
     else:
