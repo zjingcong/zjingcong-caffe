@@ -5,7 +5,7 @@ test_interval: 20
 base_lr: 0.0005
 lr_policy: "step"
 gamma: 0.5
-stepsize: 500
+stepsize: 400
 display: 10
 max_iter: 5000
 momentum: 0.9
@@ -13,7 +13,7 @@ weight_decay: 0.005
 snapshot: 100
 snapshot_prefix: "snapshots_lstm_RGB"
 solver_mode: GPU
-device_id: 3
+device_id: 2
 random_seed: 1701
 average_loss: 1000
 clip_gradients: 5
