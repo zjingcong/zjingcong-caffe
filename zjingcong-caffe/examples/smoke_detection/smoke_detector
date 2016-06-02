@@ -13,12 +13,13 @@ import os
 import sys
 import numpy as np
 import glob
+import matplotlib.pyplot as plt
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
 start_time = time.time()
 clip_length = 16
 offset = 24
-frame_rate = 15
+frame_rate = 30
 stride_length = 8   # stride_length = offset in LRCN_classify_video in classify_video
 
 
@@ -59,6 +60,22 @@ class smoke_detector:
                 index_list.extend(index[-clip_length:])
 
         return index_list
+
+    @staticmethod
+    def figure(result, p_smoke, p_no_smoke, video_name):
+        result_figure = plt.figure(video_name)
+        ax = result_figure.add_subplot(111)
+        ax.plot(xrange(1, len(result) + 1), p_smoke, 'g', label='smoke probability')
+        ax.plot(xrange(1, len(result) + 1), p_no_smoke, 'b', label='no smoke probability')
+        ax.plot(xrange(1, len(result) + 1), result, 'r', label='classification')
+        ax.legend(loc=9)
+        ax.set_yticks([-0.5, 0, 0.5, 1, 1.5])
+
+        ax.set_title(video_name)
+        ax.set_xlabel('frame id')
+        ax.set_ylabel('result')
+        plt.savefig('/home/zjc/log/{0}_result.jpg'.format(video_name))
+        plt.show()
 
     def video_preprocess(self):
         # Video preprocess: extract video frames
@@ -115,9 +132,15 @@ class smoke_detector:
                 '''
 
                 print "Result of LSTM: "
-                print result_list
+                print "No Smoke List: "
+                print map(lambda x: x[0], result_list)
+                print "Smoke List: "
+                print map(lambda x: x[1], result_list)
                 print "Classifier result of LSTM: "
                 print classifier_result_list
+                print "Total Frame Num: ", frame_num
+                print "Smoke Frame Num: ", sum(classifier_result_list)
+                print "Frame Rate: ", frame_rate, "fps"
 
             elif self.mode == 2:
                 predictions_RGB_singleFrame = result    # never used
@@ -127,12 +150,19 @@ class smoke_detector:
 
         logging.info("=========================== VIDEO CLASSIFICATION END ==============================")
 
-        self.cleaner()
+        # self.cleaner()
 
         end_time = time.time()
         print "Time Usage: ", end_time - start_time
 
+        # play the video
         # videoPlayer(self.video_path, result_list)
+
+        # figure function input: result, p_smoke, p_no_smoke, video_name
+        self.figure(classifier_result_list,
+                    map(lambda x: x[1], result_list),
+                    map(lambda x: x[0], result_list),
+                    self.video_name)
 
 
 def get_options():

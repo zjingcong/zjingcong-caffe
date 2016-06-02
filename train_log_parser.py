@@ -87,6 +87,11 @@ ax1_lr.plot(lr_summary['iter'], lr_summary['lr'], 'b', label='lr')
 ax1_train_test.legend(loc=3)
 ax1_lr.legend(loc=8)
 
+ax1_train_test.set_title('Accuracy')
+ax1_train_test.set_xlabel('iter')
+ax1_train_test.set_ylabel('Accuracy')
+ax1_lr.set_ylabel('Learning Rate')
+
 if TYPE == 'lstm':
     plt.savefig('/home/zjc/log/run_lstm_RGB_log/accuracy-{0}.jpg'.format(LOGNAME[: -4]))
 elif TYPE == 'single':
@@ -102,6 +107,11 @@ ax2_lr.plot(lr_summary['iter'], lr_summary['lr'], 'b', label='lr')
 
 ax2_train_test.legend(loc=1)
 ax2_lr.legend(loc=9)
+
+ax2_train_test.set_title('Loss')
+ax2_train_test.set_xlabel('iter')
+ax2_train_test.set_ylabel('Loss')
+ax2_lr.set_ylabel('Learning Rate')
 
 if TYPE == 'lstm':
     plt.savefig('/home/zjc/log/run_lstm_RGB_log/loss-{0}.jpg'.format(LOGNAME[: -4]))
