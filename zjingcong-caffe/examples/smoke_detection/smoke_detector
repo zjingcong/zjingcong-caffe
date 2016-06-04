@@ -154,6 +154,7 @@ class smoke_detector:
 
         end_time = time.time()
         print "Time Usage: ", end_time - start_time
+        print "Model Used: ", self.lstm_model
 
         # play the video
         # videoPlayer(self.video_path, result_list)
