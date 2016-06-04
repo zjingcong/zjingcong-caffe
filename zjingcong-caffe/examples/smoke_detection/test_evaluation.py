@@ -19,8 +19,6 @@ clip_length = 16
 offset = 24
 stride_length = 8
 
-yaml_tmp_file = '/home/zjc/log/evaluation_tmp.yaml'
-
 if len(sys.argv) > 3:
     test_file_path = sys.argv[1]
     gpu_id = int(sys.argv[2])
@@ -29,6 +27,10 @@ else:
     print "Check argv: [USAGE]python test_evaluation.py <test_file_path> <gpu_id> <lstm_caffemodel>"
     sys.exit(1)
 
+yaml_tmp_file = '/home/zjc/log/evaluation_{0}.yaml'.format(lstm_model.split('.')[0])
+
+with open(yaml_tmp_file, 'w') as create_file:
+    print "Create yaml file: ", yaml_tmp_file
 yaml_file = file(yaml_tmp_file, 'r')
 video_detected_list = yaml.load(yaml_file)
 if type(video_detected_list) == list:

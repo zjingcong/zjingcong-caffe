@@ -4,7 +4,7 @@
 import yaml
 import pprint
 
-yaml_tmp_file = '/home/zjc/log/evaluation_tmp.yaml'
+yaml_tmp_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_400.yaml'
 test_file_path = '/home/zjc/workspace/backup/test_train_txtFile_backup/' \
                  'lstm-train-2016-06-01-23:51/Smoke_split_testVideo.txt'
 video_label_file = '/home/zjc/workspace/git/zjingcong-caffe/label_video.yaml'
