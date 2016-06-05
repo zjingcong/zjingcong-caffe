@@ -47,7 +47,7 @@ class smoke_detector:
         self.mode = mode
         self.lstm_model = lstm_model
         self.video_name = os.path.split(self.video_path)[1][: -4]
-        self.tmp_folder = '/disk/zjingcong/tmp/smokeVideo/frame-{time}'.format(time=scripttime)
+        self.tmp_folder = '/disk/zjingcong/tmp/smokeVideo/fps_{0}'.format(frame_rate)
 
     @staticmethod
     def _init_index_list(frame_num):
@@ -74,7 +74,7 @@ class smoke_detector:
         ax.set_title(video_name)
         ax.set_xlabel('frame id')
         ax.set_ylabel('result')
-        plt.savefig('/home/zjc/log/{0}_result.jpg'.format(video_name))
+        plt.savefig('/home/zjc/log/video_result_pic/{0}_result.jpg'.format(video_name))
         plt.show()
 
     def video_preprocess(self):
@@ -120,16 +120,6 @@ class smoke_detector:
                     result_1 = np.mean(frame_predictions_array, 0)[1]
                     result_list.append((result_0, result_1))
                     classifier_result_list.append(np.mean(frame_predictions_array, 0).argmax())
-
-                '''
-                # get the result by group, when offset = 24, group_num = 16
-                for index in range(0, len(tmp_list), offset):
-                    if index + offset < len(tmp_list):
-                        result = np.mean(np.array(tmp_list[index: index + offset]), 0).argmax()
-                    else:
-                        result = np.mean(np.array(tmp_list[-offset:]), 0).argmax()
-                    result_list.append(result)
-                '''
 
                 print "Result of LSTM: "
                 print "No Smoke List: "

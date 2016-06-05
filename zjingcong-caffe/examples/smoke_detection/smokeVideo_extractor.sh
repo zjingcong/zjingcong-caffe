@@ -13,7 +13,7 @@ then
   exit $E_BADARGS
 fi
 
-mkdir -m 775 $3
 BNAME=`basename $NAME`
+rm -rf 755 $3/$BNAME
 mkdir -m 755 $3/$BNAME
 ffmpeg -i $1 -r $FRAMES $3/$BNAME/$BNAME.%4d.jpg > /dev/null 2>&1
