@@ -11,8 +11,6 @@ from classify_video import videoClassifier
 
 import pprint
 import sys
-import glob
-import numpy as np
 import yaml
 
 clip_length = 16
@@ -51,42 +49,7 @@ def evaluation(video_info):
     video_result, frame_predictions = videoClassifier(video_path, gpu_device=gpu_id, lstm_caffemodel=lstm_model)
 
     result_list.append({'name': video_name, 'label': label, 'f_p': frame_predictions})
-    '''
-    # get video result
-    video_evluation = 0
-    if video_result == label:
-        video_evluation = 1
 
-    # get frame result
-    frame_num = len(glob.glob('%s/*.jpg' % video_path))
-    index_list = []
-    index = range(frame_num)
-    for j in range(0, frame_num, stride_length):
-        if (j + clip_length) < frame_num:
-            index_list.extend(index[j: j + clip_length])
-        else:
-            index_list.extend(index[-clip_length:])
-
-    tmp_list = list(frame_predictions)
-    frame_p_result_list = []
-    classifier_result_list = []
-    for frame_id in xrange(frame_num):
-        frame_index_list = [k for k in xrange(len(index_list)) if index_list[k] == frame_id]
-        frame_predictions_array = np.array(map(lambda x: tmp_list[x], frame_index_list))
-        result_0 = np.mean(frame_predictions_array, 0)[0]
-        result_1 = np.mean(frame_predictions_array, 0)[1]
-        frame_p_result_list.append((result_0, result_1))
-        classifier_result_list.append(np.mean(frame_predictions_array, 0).argmax())
-
-    error_frame_id_list = [frame_id for frame_id, frame_result in enumerate(classifier_result_list)
-                           if frame_result != label]
-    error_frame_rate = float(len(error_frame_id_list)) / len(classifier_result_list)
-
-    result_list = video_detected_list
-    result_list.append({'name': video_name, 'v_result': video_evluation, 'frame_num': frame_num,
-                        'f_error_rate': error_frame_rate, 'f_error_id': error_frame_id_list,
-                        'p_result': frame_p_result_list})
-    '''
     with open(yaml_tmp_file, 'w') as yaml_file:
         yaml_file.write(yaml.dump(result_list, default_flow_style=False))
 

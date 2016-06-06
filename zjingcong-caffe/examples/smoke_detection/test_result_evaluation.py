@@ -8,7 +8,6 @@ import glob
 import numpy as np
 import pprint
 import os
-import time
 
 video_frame_db = '/disk/zjingcong/frame_db'
 clip_length = 16
@@ -63,8 +62,7 @@ def evluation(result_info, threshold):
                                  'f_error_rate': error_frame_rate, 'f_error_id': error_frame_id_list})
 
 
-def result_evaluation(threshold):
-    time0 = time.time()
+def result_evaluation(threshold, show_result=False):
     result_yaml_file = '/home/zjc/log/result_snapshots_lstm_RGB_iter_200.yaml'
     evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
 
@@ -74,7 +72,8 @@ def result_evaluation(threshold):
     video_result_summary = []
     for result_info in result_total:
         evluation(result_info, threshold)
-    pprint.pprint(video_result_summary)
+    if show_result is True:
+        pprint.pprint(video_result_summary)
     with open(evaluation_yaml_file, 'w') as evaluation_file:
         evaluation_file.write(yaml.dump(video_result_summary, default_flow_style=False))
 

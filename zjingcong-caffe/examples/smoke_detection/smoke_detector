@@ -14,6 +14,7 @@ import sys
 import numpy as np
 import glob
 import matplotlib.pyplot as plt
+import yaml
 
 scripttime = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
 start_time = time.time()
@@ -21,6 +22,7 @@ clip_length = 16
 offset = 24
 frame_rate = 30
 stride_length = 8   # stride_length = offset in LRCN_classify_video in classify_video
+video_result_yaml_path = '/home/zjc/log/video_result_yaml'
 
 
 def init(video_name):
@@ -131,6 +133,13 @@ class smoke_detector:
                 print "Total Frame Num: ", frame_num
                 print "Smoke Frame Num: ", sum(classifier_result_list)
                 print "Frame Rate: ", frame_rate, "fps"
+
+                video_result = {'no_smoke': map(lambda x: x[0], result_list), 'smoke': map(lambda x: x[1], result_list),
+                                'result': classifier_result_list, 'total_frame': frame_num,
+                                'smoke_frame': sum(classifier_result_list)}
+
+                with open(os.path.join(video_result_yaml_path, self.video_name) + '.yaml', 'w') as video_yaml:
+                    video_yaml.write(str(video_result))
 
             elif self.mode == 2:
                 predictions_RGB_singleFrame = result    # never used

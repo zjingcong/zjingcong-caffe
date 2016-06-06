@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Usage -  plz run after test_result_evaluation.py: python evaluation_summary.py <threshold>
+# Usage: (plz run after test_result_evaluation.py) python evaluation_summary.py <threshold>
 # The default threshold is 0.5
 
 import yaml
@@ -27,7 +27,8 @@ def false_rate(error2smoke, error2no_smoke, smoke, no_smoke):
 
 
 def summary(threshold, show_result=False):
-    evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
+    evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_400.yaml'
+    # evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
     f = file(evaluation_yaml_file, 'r')
     evaluation_result_total = yaml.load(f)
 
@@ -49,6 +50,7 @@ def summary(threshold, show_result=False):
     error_video = 0
 
     class_summary = dict()
+    error_videoname_list = []
 
     with open(test_file_path, 'r') as test_file:
         test_info_list = test_file.readlines()
@@ -79,6 +81,7 @@ def summary(threshold, show_result=False):
         v_error = 0
         if v_result == 0:  # video result is false
             v_error = 1
+            error_videoname_list.append((video_class, video_name))
 
         total_frame_num += frame_num
         total_error_num += error_frame_num
@@ -135,8 +138,10 @@ def summary(threshold, show_result=False):
         print '=' * 20
         print "Class Summary: "
         pprint.pprint(class_summary)
+        print "Video Error: "
+        pprint.pprint(error_videoname_list)
 
     return v_precision, v_recall, v_false_rate, f_precision, f_recall, f_false_rate
 
 # summary single threshold
-# summary(1.0)
+summary(0.5, show_result=True)
