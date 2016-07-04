@@ -175,7 +175,7 @@ def get_options():
     parser.add_option('-m', '--mode', action='store', dest='mode', default=1,
                       help='Select mode: 1 - LSTM only, 2 - singleFrame only. '
                            'The default mode is 1.')
-    parser.add_option('-l', '--lstm', action='store', dest='lstm', default='snapshots_lstm_RGB_iter_1600.caffemodel',
+    parser.add_option('-l', '--lstm', action='store', dest='lstm', default='snapshots_lstm_RGB_iter_200.caffemodel',
                       help='Select the caffemodel used for lstm classification.')
 
     (options, args) = parser.parse_args()

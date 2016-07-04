@@ -5,7 +5,7 @@
 # EX: test_file_path =
 # '/home/zjc/workspace/backup/test_train_txtFile_backup/lstm-train-2016-05-22-20:05/Smoke_split_testVideo.txt'
 # gpu_id = 0
-# lstm_model = 'snapshots_lstm_RGB_iter_1600.caffemodel'
+# lstm_model = 'snapshots_lstm_RGB_iter_200.caffemodel'
 
 from classify_video import videoClassifier
 
@@ -27,7 +27,7 @@ else:
 yaml_tmp_file = '/home/zjc/log/result_{0}.yaml'.format(lstm_model.split('.')[0])
 
 # initialization
-with open(yaml_tmp_file, 'w') as create_file:
+with open(yaml_tmp_file, 'a') as create_file:
     print "Create yaml file: ", yaml_tmp_file
 yaml_file = file(yaml_tmp_file, 'r')
 video_detected_list = yaml.load(yaml_file)
@@ -38,7 +38,6 @@ else:
     videoname_detected_list = []
 
 print "Caffemodel Used: ", lstm_model
-result_list = []
 
 
 # video_info: <tuple>(<str>video_path, <int>label)
@@ -47,7 +46,7 @@ def evaluation(video_info):
     label = video_info[1]
     video_name = video_path.split('/')[-1]
     video_result, frame_predictions = videoClassifier(video_path, gpu_device=gpu_id, lstm_caffemodel=lstm_model)
-
+    result_list = video_detected_list
     result_list.append({'name': video_name, 'label': label, 'f_p': frame_predictions})
 
     with open(yaml_tmp_file, 'w') as yaml_file:
@@ -58,10 +57,10 @@ with open(test_file_path, 'r') as test_file:
 # test_info_list: <list>[<tuple>(<str>video_path, <int>label)]
 test_info_list = map(lambda x: (x.split(' ')[0], int(x.split(' ')[1])), test_info_list)
 # video detection: <list>[<tuple>(<str>video_path, <int>label)]
-video_undetected_list = [i for i in test_info_list if i[0].split('/')[-1] not in videoname_detected_list]
-print "Undetected Videos: ", len(video_undetected_list)
+videoname_undetected_list = [i for i in test_info_list if i[0].split('/')[-1] not in videoname_detected_list]
+print "Undetected Videos: ", len(videoname_undetected_list)
 
 # evaluation_result: <list>
 # [<tuple>(<str>video_name, <int>video_evaluation_result, <float>error_frame_rate, <list>error_frame_id)]
 # video_evaluation_result - 1: correct, 0: error
-map(evaluation, video_undetected_list)
+map(evaluation, videoname_undetected_list)

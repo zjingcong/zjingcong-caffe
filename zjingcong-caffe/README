@@ -1,0 +1,9 @@
+zjingcong-caffe by zjingcong
+a smoke video detector based on deep learning of LRCN
+plz find the LRCN training code in examples/LRCN_smoke_detection/
+plz find the smoke detection code(network model evaluation code) in examples/smoke_detection/
+plz find other related tools in root directory
+if any questions, plz contact jingcong.zhang@outlook.com
+or look at git@github.com:zjingcong/zjingcong-caffe.git
+thx
+20160704

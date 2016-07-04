@@ -63,9 +63,22 @@ def evluation(result_info, threshold):
 
 
 def result_evaluation(threshold, show_result=False):
+    '''
+    # iter = 200
     result_yaml_file = '/home/zjc/log/result_snapshots_lstm_RGB_iter_200.yaml'
-    evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
-
+    evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+                           'evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
+    '''
+    # iter = 300
+    result_yaml_file = '/home/zjc/log/result_snapshots_lstm_RGB_iter_300.yaml'
+    evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+                           'evaluation_snapshots_lstm_RGB_iter_300_threshold_{0}.yaml'.format(threshold)
+    '''
+    # iter = 400
+    result_yaml_file = '/home/zjc/log/result_snapshots_lstm_RGB_iter_400.yaml'
+    evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+                           'evaluation_snapshots_lstm_RGB_iter_400_threshold_{0}.yaml'.format(threshold)
+    '''
     f = file(result_yaml_file, 'r')
     result_total = yaml.load(f)
     global video_result_summary

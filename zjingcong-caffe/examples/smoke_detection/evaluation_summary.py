@@ -27,8 +27,16 @@ def false_rate(error2smoke, error2no_smoke, smoke, no_smoke):
 
 
 def summary(threshold, show_result=False):
-    evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_400.yaml'
-    # evaluation_yaml_file = '/home/zjc/log/evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
+    # iter = 200
+    evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+                           'evaluation_snapshots_lstm_RGB_iter_200_threshold_{0}.yaml'.format(threshold)
+    # iter = 300
+    # evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+    #                        'evaluation_snapshots_lstm_RGB_iter_300_threshold_{0}.yaml'.format(threshold)
+    # iter = 400
+    # evaluation_yaml_file = '/home/zjc/log/threshold_evaluation/' \
+    #                        'evaluation_snapshots_lstm_RGB_iter_400_threshold_{0}.yaml'.format(threshold)
+
     f = file(evaluation_yaml_file, 'r')
     evaluation_result_total = yaml.load(f)
 
