@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Get dataset summary. Return a dict of dataset info like: <dict>{<class>: <tuple>(<int>video_num, <int>frame_num)}
 
 import glob
 import yaml
